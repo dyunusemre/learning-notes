@@ -48,7 +48,8 @@
         3. In its essence, a model is an abstraction
             1. The notion of abstraction allows us to handle complexity by omitting unnecessary details and leaving only what’s needed for solving the problem at hand.
     3. ### Modeling the Business Domain
-        
+        1. 
+
 
 
 
