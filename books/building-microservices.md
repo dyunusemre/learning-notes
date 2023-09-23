@@ -699,7 +699,6 @@
       3. Infrastructure as Code (IAC)
       4. Zero-Downtime Deployment
       5. Desired State Management
-         
          1. Prerequisites
          2. GitOps
    3. Deployment Options
