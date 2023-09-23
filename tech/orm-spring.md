@@ -156,7 +156,7 @@ These components work together to provide a cohesive and consistent mechanism fo
 
 #### 2nd Level Cache
 
-The 2nd level cache, on the other hand, is associated with the EntityManagerFactory (or the session factory in the case of Hibernate). It's shared across multiple EntityManager instances and can span multiple transactions and sessions.
+- The 2nd level cache, on the other hand, is associated with the EntityManagerFactory (or the session factory in the case of Hibernate). It's shared across multiple EntityManager instances and can span multiple transactions and sessions.
 
 
 
