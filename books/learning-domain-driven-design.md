@@ -181,3 +181,74 @@
 
 
 # **Chapter 4. Integrating Bounded Contexts**
+1. Not only does the bounded context pattern protect the consistency of a ubiquitous language, it also enables modeling. 
+2. You cannot build a model without specifying its purpose—its boundary.
+3. Moreover, models in different bounded contexts can be evolved and implemented independently.
+4. There will always be touchpoints between bounded contexts. These are called contracts.
+5. The need for contracts results from differences in bounded contexts’ models and languages.
+
+6. ## Cooperation
+    1. Cooperation patterns relate to bounded contexts implemented by teams with well-established communication.
+    2. ### **Partnership**
+        1. One team can notify a second team about a change in the API, and the second team will cooperate and adapt—no drama or conflicts. Both sides cooperate in solving any integration issues that might come up
+        2. ![Partnership model](image-8.png)
+        3. This pattern might not be a good fit for geographically distributed team
+    3. ### **Shared Kernel**
+        1. ![Alt text](image-9.png)
+        2. **Shared scope**
+            1. To minimize the cascading effects of changes, the overlapping model should be limited, exposing only that part of the model that has to be implemented by both bounded contexts
+        3. **Implementation**
+            1. If the organization uses the mono-repository approach, these can be the same source files referenced by multiple bounded contexts. If using a shared repository is not possible, the shared kernel can be extracted into a dedicated project and referenced in the bounded contexts as a linked library
+        4. **When**
+            1. only when integrating changes applied to the shared model by both bounded contexts will require more effort than coordinating the changes in the shared codebase
+            2. The difference between the integration and duplication costs depends on the volatility of the model
+            3.  The more frequently it changes, the higher the integration costs will be. Therefore, the shared kernel will naturally be applied for the subdomains that change the most: the core subdomains.
+            4. Finally, a shared kernel can be a good fit for integrating bounded contexts owned and implemented by the same team.
+            5. A shared kernel can be used for explicitly defining the bounded contexts’ integration contracts.
+7. ## Customer–Supplier
+    1. ![Customer-Supplier](image-10.png)
+    2. Provides a service for its customers. The service provider is “upstream” and the customer or consumer is “downstream.”
+    3. both teams (upstream and downstream) can succeed independently. Consequently, in most cases we have an imbalance of power: either the upstream or the downstream team can dictate the integration contract
+    4. **three patterns addressing such power differences**
+        #### Conformist
+        1. If the downstream team can accept the upstream team’s model, the bounded contexts’ relationship is called conformist
+        2.  the contract exposed by the upstream team may be an industry-standard, well-established model, or it may just be good enough for the downstream team’s needs and conformed by downstream team.
+        #### Anticorruption Layer
+        1.  it can translate the upstream bounded context’s model into a model tailored to its own needs via an anticorruption layer
+        -  consumer is not willing to accept the supplier’s model.
+        2. The anticorruption layer pattern addresses scenarios in which **it is not desirable** or **worth the effort to conform to the supplier’s model**
+        - **When the downstream bounded context contains a core subdomain**
+        - **When the upstream model is inefficient or inconvenient for the consumer’s needs**
+        - **When the supplier’s contract changes often**
+        #### Open-Host Service
+        1.  the supplier implements the translation of its internal model.
+        2. the upstream supplier decouples the implementation model from the public interface
+        3. Logging framework?
+
+8. ## Separate Ways
+    1. The last collaboration option is not to collaborate at all. 
+    2. The separate ways pattern should be avoided when integrating core subdomains. Duplicating the implementation of such subdomains would defy the company’s strategy to implement them in the most effective and optimized way.
+
+9. ## Context Map
+    1. After analyzing the integration patterns between a system’s bounded contexts, we can plot them on a context map
+    - ![Alt text](image-11.png)
+        - High-level design: A context map provides an overview of the system’s components and the models they implement.
+        - Communication patterns: A context map depicts the communication patterns among teams
+        - Organizational issues: A context map can give insight into organizational issues.
+
+10. ## Conclusion
+    1. Bounded contexts are not independent. They have to interact with one another. The following patterns define different ways bounded contexts can be integrated
+        - **Partnership**
+            Bounded contexts are integrated in an ad hoc manner.
+        - **Shared kernel**
+            - Two or more bounded contexts are integrated by sharing a limited overlapping model that belongs to all participating bounded contexts.
+        - **Conformist**
+            - The consumer conforms to the service provider’s model.
+        - **Anticorruption layer**
+            - The consumer translates the service provider’s model into a model that fits the consumer’s needs.
+        - **Open-host service**
+            - The service provider implements a published language—a model optimized for its consumers’ needs.
+        - **Separate ways**
+            - It’s less expensive to duplicate particular functionality than to collaborate and integrate it.
+
+# **Chapter 5. Implementing Simple Business Logic**
