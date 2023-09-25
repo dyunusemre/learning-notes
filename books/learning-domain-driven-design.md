@@ -561,20 +561,20 @@
    2.  One of the ways to fill in the missing information(history of a state changes) is to use event sourcing.
    3.  an event sourcing–based system persists events documenting every change in an aggregate’s lifecycle.
    #### Search
-   - ![Alt text](image.png)
-   - ![History And Search](image-1.png)
+   - ![Alt text]img/2image.png)
+   - ![History And Search]img/2image-1.png)
    #### Analysis
-   - ![And other states](image-2.png)
-   - ![Current Status](image-3.png)
+   - ![And other states]img/2image-2.png)
+   - ![Current Status]img/2image-3.png)
 
    #### Source of Truth
    - For the event sourcing pattern to work, all changes to an object’s state should be represented and persisted as events. These events become the system’s source of truth (hence the name of the pattern). 
-   - ![Alt text](image-4.png)
+   - ![Alt text]img/2image-4.png)
    - The accepted name for the database that is used for persisting events is **event store**.
 
    #### Event Store
    - The event store should not allow modifying or deleting the events2 since it’s append-only storage. 
-   - ![Alt text](image-5.png)
+   - ![Alt text]img/2image-5.png)
    - The expectedVersion argument in the Append method is needed to implement optimistic concurrency management
 
 ## Event-Sourced Domain Model
@@ -590,13 +590,13 @@
 
    - Commit the new domain events to the event store.
 
-   1. ![Load Events and Create Ticket](image-6.png)
-   2. ![Ticket Aggregate recreate logic in constructor](image-7.png)
+   1. ![Load Events and Create Ticket]img/2image-6.png)
+   2. ![Ticket Aggregate recreate logic in constructor]img/2image-7.png)
    - instantiates an instance of the state projector class, TicketState, and sequentially calls its AppendEvent method for each of the ticket’s events:
-   3. ![Passes the events to TicketState, so we can generate current state of ticket, with the overloaded apply method](image-8.png)
-   4. ![Escalation Business logic](image-9.png)
+   3. ![Passes the events to TicketState, so we can generate current state of ticket, with the overloaded apply method]img/2image-8.png)
+   4. ![Escalation Business logic]img/2image-9.png)
    - Business not change the ticket aggregate state instead it creates a TicketEscalated Domain events. We don't alter the aggregate domain model, we send domain events to achieve Event-Source Domain Model.
-   5. ![Apply Methods with different Domain Event Type overloaded](image-10.png)
+   5. ![Apply Methods with different Domain Event Type overloaded]img/2image-10.png)
 
    #### Advantages
    - Compared to the more traditional model, in which the aggregates’ current states are persisted in a database, the event-sourced domain model requires more effort to model the aggregates
@@ -634,4 +634,5 @@
    5. This chapter completes our exploration of the different ways to model and implement business logic.
 
 # **Chapter 8. Architectural Patterns**
+
        
