@@ -457,9 +457,9 @@
 
       #### **Implemantation**
          - Since a change to any of the fields of a value object results in a different value, value objects are implemented as immutable objects. A change to one of the value object’s fields conceptually creates a different value—a different instance of a value object.
-         - ![Alt text](image.png)
+         - ![Alt text](img/ximage.png)
          - Since the equality of value objects is based on their values rather than on an id field or reference, it’s important to override and properly implement the equality checks
-         - ![Alt text](image-1.png)
+         - ![Alt text](img/ximage-1.png)
       #### **When to use value objects**
          1. The simple answer is, whenever you can. Not only do value objects make the code more expressive and encapsulate business logic that tends to spread apart, but the pattern makes the code safer. 
          2. to introduce a value object is when modeling money and other monetary values. 
@@ -467,7 +467,7 @@
    2. ### **Entities**
       1. An entity is the opposite of a value object. It requires an explicit identification field to distinguish between the different instances of the entity.
       2. Contrary to value objects, entities are not immutable and are expected to change. Another difference between entities and value objects is that value objects describe an entity’s properties.
-      - ![Entitiy with an Id](image-2.png)
+      - ![Entitiy with an Id](img/ximage-2.png)
    3. ### **Aggregates** 
       1. An aggregate is an entity. it requires an explicit identification field and its state is expected to change during an instance’s lifecycle.
       2. **The goal of the pattern is to protect the consistency of its data.**
@@ -477,16 +477,16 @@
          2. the aggregate pattern draws a clear boundary between the aggregate and its outer scope: the aggregate is a consistency enforcement boundary. The aggregate’s logic has **to validate all incoming modifications** and **ensure that the changes do not contradict its business rules.**
          3. The state-modifying methods exposed as an aggregate’s public interface are often referred to as commands, as in “a command to do something.”
          4.  A command can be implemented in two ways.
-         - ![with params](image-3.png)
-         - ![with param objects](image-4.png)
+         - ![with params](img/ximage-3.png)
+         - ![with param objects](img/ximage-4.png)
          5. An aggregate’s public interface is responsible for validating the input and enforcing all of the relevant business rules and invariants.
          6. This strict boundary also ensures that all business logic related to the aggregate is implemented in one place: the aggregate itself.
          7. This makes the application layer [Service Layer] that orchestrates operations on aggregates rather simple
-         - ![Service layer finds the ticket, execute the command(or business) and return the result](image-5.png)
+         - ![Service layer finds the ticket, execute the command(or business) and return the result](img/ximage-5.png)
          8.  If multiple processes are concurrently updating the same aggregate, we have to prevent the latter transaction from blindly overwriting the changes committed by the first one.
          9. Hence, the database used for storing aggregates has to support concurrency management. In its simplest form, an aggregate should hold a version field that will be incremented after each update:
-         - ![Alt text](image-6.png)
-         10. ![Alt text](image-7.png)
+         - ![Alt text](img/ximage-6.png)
+         10. ![Alt text](img/ximage-7.png)
          11. document databases lend themselves more toward working with aggregates.
          12.  it’s crucial to ensure that the database used for storing an aggregate’s data supports concurrency management.
       #### *Transaction boundary*
@@ -497,22 +497,22 @@
          1. we don’t use entities as an independent pattern, only as part of an aggregate.
          2. There are business scenarios in which multiple objects should share a transactional boundary
          3. DDD prescribes that a system’s design should be driven by its business domain.
-         - ![Alt text](image-8.png)
+         - ![Alt text](img/ximage-8.png)
          4. The hierarchy contains both entities and value objects, and all of them belong to the same aggregate if they are bound by the domain’s business logic.
          5. That’s why the pattern is named “aggregate”: it aggregates business entities and value objects that belong to the same transaction boundary.
          6. To support changes to multiple objects that have to be applied in one atomic transaction, the aggregate pattern resembles a hierarchy of entities, all sharing transactional consistency,
          7. The aggregate ensures that all the conditions are checked against strongly consistent data, and it won’t change after the checks are completed by ensuring that all changes to the aggregate’s data are performed as one atomic transaction.
       #### *Referencing other aggregates*
          1.  Only the information that is required by the aggregate’s business logic to be strongly consistent should be a part of the aggregate. All information that can be eventually consistent should reside outside of the aggregate’s boundary;
-         - ![Alt text](image-9.png)
+         - ![Alt text](img/ximage-9.png)
          2. keep the aggregates as small as possible and include only objects that are required to be in a strongly consistent state by the aggregate’s business logic:
-         - ![Alt text](image-10.png)
+         - ![Alt text](img/ximage-10.png)
          -  the Ticket aggregate references a collection of messages, which belong to the aggregate’s boundary. On the other hand, the customer, the collection of products that are relevant to the ticket, and the assigned agent do not belong to the aggregate and therefore are referenced by its ID.
          - The reasoning behind referencing external aggregates by ID is to reify that these objects do not belong to the aggregate’s boundary, and to ensure that each aggregate has its own transactional boundary
       #### **Aggregate Root**
          1. Since an aggregate represents a hierarchy of entities, only one of them should be designated as the aggregate’s public interface
-         2. ![Application Layer, Service Layer access the root and change internal state of the aggregate](image-11.png)
-         ![Message Entity changed by application layer by thourgh aggreagete root Ticket](image-12.png)
+         2. ![Application Layer, Service Layer access the root and change internal state of the aggregate](img/ximage-11.png)
+         ![Message Entity changed by application layer by thourgh aggreagete root Ticket](img/ximage-12.png)
          3. In addition to the aggregate root’s public interface, there is another mechanism through which the outer world can communicate with aggregates: domain events.
       #### **Domain Events**
          1. A domain event is a message describing a significant event that has occurred in the business domain
@@ -520,7 +520,7 @@
          3. Make sure the names of the domain events succinctly reflect exactly what has happened in the business domain.
          4. Domain events are part of an aggregate’s public interface. An aggregate publishes its domain events.
          5. Other processes, aggregates, or even external systems can subscribe to and execute their own logic in response to the domain events
-         6. ![Alt text](image-13.png)
+         6. ![Alt text](img/ximage-13.png)
       #### **Ubiquitous language**
          1. Last but not least, aggregates should reflect the ubiquitous language. The terminology that is used for the aggregate’s name, its data members, its actions, and its domain events all should be formulated in the bounded context’s ubiquitous language
    4. ### **Domain Services**
