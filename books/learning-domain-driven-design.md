@@ -336,72 +336,111 @@
     }
 
     ```
-    ## Distributed transactions
-    1. In modern distributed systems, it’s a common practice to make changes to the data in a database and then notify other components of the system about the changes by publishing messages into a message bus.
-    2. As in the previous example, any failure occurring after line 7 but before line 9 succeeds will corrupt the system’s state. Unfortunately, fixing the issue is not as easy as in the previous example.
-    ```
-    public void Execute(Guid userId, DataTime visitedOn)
-    {
-        _relational.Execute("UPDATE Users SET last_visit=@p1 WHERE user_id=@p2", visitedOn,userId);
-        _messageBus.Publish("VISITS_TOPIC", new { UserId = userId, VisitDate = visitedOn });
-    }
+   ## Distributed transactions
+   1. In modern distributed systems, it’s a common practice to make changes to the data in a database and then notify other components of the system about the changes by publishing messages into a message bus.
+   2. As in the previous example, any failure occurring after line 7 but before line 9 succeeds will corrupt the system’s state. Unfortunately, fixing the issue is not as easy as in the previous example.
+   ```
+   public void Execute(Guid userId, DataTime visitedOn)
+   {
+      _relational.Execute("UPDATE Users SET last_visit=@p1 WHERE user_id=@p2", visitedOn,userId);
+      _messageBus.Publish("VISITS_TOPIC", new { UserId = userId, VisitDate = visitedOn });
+   }
 
-    ```
-    ### Implicit distributed transactions
-    1. ![Alt text](image-12.png)
-    2. if below method is part of a REST service and there is a network outage.
-    3. if any failure case, client migght retry network call again it can make system as invalid state. There is not simple fix for this.
-    4. one way to ensure transactional behavior is to make the operation ***idempotent***:
-    5. another way, we can ask the consumer to pass the value of the counter. To supply the counter’s value, the caller will have to read the current value first, increase it locally, and then provide the updated value as a parameter.
-    ```
-    public void Execute(Guid userId)
-    {
-        _db.Execute("UPDATE Users SET visits=visits+1 WHERE user_id=@p1",
-                    userId);
-    }
-    ```
-
-    ### When to Use Transaction Script
-    1. in extract-transform-load (ETL) operations, each operation extracts data from a source, applies transformation logic to convert it into another form, and loads the result into the destination store.
-    - ![ETL: ](image-13.png)
-    2. The transaction script pattern naturally fits supporting subdomains where, by definition, the business logic is simple.
-    3. this pattern won’t cope with the high complexity of a core subdomain’s business logic.
-    4. Sometimes the pattern is even treated as an antipattern. 
+   ```
+   ### Implicit distributed transactions
+   1. ![Alt text](image-12.png)
+   2. if below method is part of a REST service and there is a network outage.
+   3. if any failure case, client migght retry network call again it can make system as invalid state. There is not simple fix for this.
+   4. one way to ensure transactional behavior is to make the operation ***idempotent***:
+   5. another way, we can ask the consumer to pass the value of the counter. To supply the counter’s value, the caller will have to read the current value first, increase it locally, and then provide the updated value as a parameter.
+   ```
+   public void Execute(Guid userId)
+   {
+       _db.Execute("UPDATE Users SET visits=visits+1 WHERE user_id=@p1",
+                   userId);
+   }
+   ```
+   ### When to Use Transaction Script
+   1. in extract-transform-load (ETL) operations, each operation extracts data from a source, applies transformation logic to convert it into another form, and loads the result into the destination store.
+   - ![ETL: ](image-13.png)
+   2. The transaction script pattern naturally fits supporting subdomains where, by definition, the business logic is simple.
+   3. this pattern won’t cope with the high complexity of a core subdomain’s business logic.
+   4. Sometimes the pattern is even treated as an antipattern. 
 
 2. # Active Record [anemic domain model antipattern]
 - Notes: active record supports cases where the business logic is simple. however, the business logic may operate on more complex data structures.
 - ![Alt text](image-14.png)
-    ## Implementation
-    1. Consequently, this pattern uses dedicated objects, known as active records, to represent complicated data structures.
-    2. These objects also implement data access methods for creating, reading, updating, and deleting records—the so-called CRUD operations.
-    3. As a result, the active record objects are coupled to an object-relational mapping (ORM) or some other data access framework. 
-    4. As in the previous pattern, the system’s business logic is organized in a transaction script. The difference between the two patterns is that in this case, instead of accessing the database directly, the transaction script manipulates active record objects.
-    5. The pattern’s goal is to encapsulate the complexity of mapping the in-memory object to the database’s schema
-    6. being responsible for persistence, the active record objects can contain business logic; for example, validating new values assigned to the fields, or even implementing business-related procedures that manipulate an object’s data.
-    ```
-    public void Execute(userDetails)
-    {
-        try
-        {
-            _db.StartTransaction();
-            var user = new User();
-            user.Name = userDetails.Name;
-            user.Email = userDetails.Email;
-            user.Save();
-            _db.Commit();
-        } catch {
-            _db.Rollback();
-            throw;
-        }
-    }
-    ```
-    ## When to Use Active Record
-    1. Because an active record is essentially a transaction script that optimizes access to databases, this pattern can only support relatively simple business logic, such as CRUD operations, which, at most, validate the user’s input.
-    2.  The difference between the patterns [Transaction and Active Record] is that active record addresses the complexity of mapping complicated data structures to a database’s schema.
-        - Active Record we used mapped database objects ***ORM***.
-        - Transaction Pattern we directly access the database.
-    5. The active record pattern is also known as an anemic domain model antipattern;
-    
+   
+   ## Implementation
+   
+   1. Consequently, this pattern uses dedicated objects, known as active records, to represent complicated data structures.
+   2. These objects also implement data access methods for creating, reading, updating, and deleting records—the so-called CRUD operations.
+   3. As a result, the active record objects are coupled to an object-relational mapping (ORM) or some other data access framework.
+   4. As in the previous pattern, the system’s business logic is organized in a transaction script. The difference between the two patterns is that in this case, instead of accessing the database directly, the transaction script manipulates active record objects.
+   5. The pattern’s goal is to encapsulate the complexity of mapping the in-memory object to the database’s schema
+   6. being responsible for persistence, the active record objects can contain business logic; for example, validating new values assigned to the fields, or even implementing business-related procedures that manipulate an object’s data.
+   
+   ```
+   public void Execute(userDetails)
+   {
+      try
+      {
+          _db.StartTransaction();
+          var user = new User();
+          user.Name = userDetails.Name;
+          user.Email = userDetails.Email;
+          user.Save();
+          _db.Commit();
+      } catch {
+          _db.Rollback();
+          throw;
+      }
+   }
+   ```
+  
+   ## When to Use Active Record
+  
+   1. Because an active record is essentially a transaction script that optimizes access to databases, this pattern can only support relatively simple business logic, such as CRUD operations, which, at most, validate the user’s input.
+   2. The difference between the patterns [Transaction and Active Record] is that active record addresses the complexity of mapping complicated data structures to a database’s schema.
+     - Active Record we used mapped database objects ***ORM***.
+     - Transaction Pattern we directly access the database.
+  3. The active record pattern is also known as an anemic domain model antipattern;
+
 # **Chapter 6. Tackling Complex Business Logic**
+
+- The domain model pattern
+- The pattern is “domain model,” and the aggregates and value objects are its building blocks.
+  
+   ## Domain Model
+  
+   1. For complex business logic
+   2. instead of CRUD interfaces, we deal with complicated state transitions, business rules, and invariants: rules that have to be protected at all times.
+  
+   ## Implementation
+   
+   1. A domain model is an object model of the domain that incorporates both behavior and data.1 DDD’s tactical patterns—aggregates, value objects, domain events, and domain services—are the building blocks of such an object model.
+   2. ### Complexity
+      1. objects implementing business logic without relying on or directly incorporating any infrastructural components or framework
+   3. ### Ubiquitous language
+      1. this pattern allows the code to “speak” the ubiquitous language and to follow the domain experts’ mental models.
+   
+   ## Building Blocks
+   1. ### **Value object**
+      1. A value object is an object that can be identified by the composition of its values.
+         2. no explicit identification field is needed to identify colors.
+         3. two instances of the same color must have the same values
+         4. Changing the value of one of the fields will result in a new color
+         -   ```
+            class Color
+            {
+                  int _red;
+                  int _green;
+                  int _blue;
+            }
+            ```
+         5. ![id field makes a bug not only reduntant!!](image-15.png)
+
+   2. ### **Ubiquitous language**
+      
 
 
