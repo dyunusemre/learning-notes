@@ -18,7 +18,7 @@
 3. ## Communication
    
    1. software projects require the collaboration of stakeholders in different roles: domain experts, product owners, engineers, UI and UX designers, project managers, testers, analysts, and others
-   2. ![Alt text](image.png)
+   2. ![Alt text](img/image.png)
    3. In any translation, information is lost; in this case, domain knowledge that is essential for solving business problems gets lost on its way to the software engineers.
    4. Domain-driven design proposes a better way to get the knowledge from domain experts to software engineers: by using a ubiquitous language.
 4. ## What Is a Ubiquitous Language?
@@ -107,7 +107,7 @@
 1. ## Inconsistent Models
    
    1. each term should have one meaning. ubiquitous language has to be consistent
-      - ![Alt text](image-1.png)
+      - ![Alt text](img/image-1.png)
       - it is more difficult to represent such a divergent model of the business domain in software. Source code doesn’t cope well with ambiguity. If we were to bring the sales department’s complicated model into marketing, it would introduce complexity where it’s not needed
    2. a solution would be to prefix the problematic term with a definition of the context: “marketing lead” and “sales lead.”
    3. this approach has two main disadvantages. First, it induces cognitive load
@@ -118,7 +118,7 @@
    
    1. The solution in domain-driven design is trivial: **divide the ubiquitous language into multiple smaller languages, then assign each one to the explicit context in which it can be applied: its bounded context.**
    2. marketing and sales. The term lead exists in both bounded contexts
-      - ![Alt text](image-2.png)
+      - ![Alt text](img/image-2.png)
    3. ### *Model Boundaries*
       
       1. A model is not a copy of the real world but a construct that helps us make sense of a complex system.
@@ -136,7 +136,7 @@
       
       1. To model the business domain, we had to divide the model and define a strict applicability context for each fine-grained model—its bounded context.
       2. The consistency of the ubiquitous language only helps to identify the widest boundary of that language.
-      3. ![Alt text](image-3.png)
+      3. ![Alt text](img/image-3.png)
       4. Defining the scope of a ubiquitous language—its bounded context—is a strategic design decision.
       5. Models shouldn’t necessarily be big or small. Models need to be useful.
       6. The wider the boundary of the ubiquitous language is, the harder it is to keep it consistent.
@@ -158,10 +158,10 @@
       1. Bounded contexts, on the other hand, are designed. Choosing models’ boundaries is a strategic design decision. We decide how to divide the business domain into smaller, manageable problem domains.
    4. ### *The Interplay Between Subdomains and Bounded Contexts*
       
-      1. ![Monolithic Bounded Context](image-4.png)
-      2. ![Bounded context driven by ubiquitous language](image-5.png)
+      1. ![Monolithic Bounded Context](img/image-4.png)
+      2. ![Bounded context driven by ubiquitous language](img/image-5.png)
       3. If the models are still large and hard to maintain, we can decompose them into even smaller bounded contexts
-      4. ![Bounded contexts aligned with subdomain boundaries](image-6.png)
+      4. ![Bounded contexts aligned with subdomain boundaries](img/image-6.png)
       5. Having a one-to-one relationship between bounded contexts and subdomains can be perfectly reasonable in some scenarios. In others, however, different decomposition strategies can be more suitable.
       6. It’s crucial to remember that subdomains are discovered and bounded contexts are designed.
       7. The subdomains are defined by the business strategy. However, we can design the software solution and its bounded contexts to address the specific project’s context and constraints.
@@ -179,7 +179,7 @@
       2. The division of work between teams is another strategic decision that can be made using the bounded context pattern.
       3. A bounded context should be implemented, evolved, and maintained by one team only.
       4. No two teams can work on the same bounded context. This segregation eliminates implicit assumptions that teams might make about one another’s models. Instead, they have to define communication protocols for integrating their models and systems explicitly.
-      5. ![a bounded context should be owned by only one team, a single team can own multiple bounded contexts](image-7.png)
+      5. ![a bounded context should be owned by only one team, a single team can own multiple bounded contexts](img/image-7.png)
 5. ## Bounded Contexts in Real Life
    
    1. ### *Semantic Domains*
@@ -208,11 +208,11 @@
    2. ### **Partnership**
       
       1. One team can notify a second team about a change in the API, and the second team will cooperate and adapt—no drama or conflicts. Both sides cooperate in solving any integration issues that might come up
-      2. ![Partnership model](image-8.png)
+      2. ![Partnership model](img/image-8.png)
       3. This pattern might not be a good fit for geographically distributed team
    3. ### **Shared Kernel**
       
-      1. ![Alt text](image-9.png)
+      1. ![Alt text](img/image-9.png)
       2. **Shared scope**
          1. To minimize the cascading effects of changes, the overlapping model should be limited, exposing only that part of the model that has to be implemented by both bounded contexts
       3. **Implementation**
@@ -225,7 +225,7 @@
          5. A shared kernel can be used for explicitly defining the bounded contexts’ integration contracts.
 7. ## Customer–Supplier
    
-   1. ![Customer-Supplier](image-10.png)
+   1. ![Customer-Supplier](img/image-10.png)
    2. Provides a service for its customers. The service provider is “upstream” and the customer or consumer is “downstream.”
    3. both teams (upstream and downstream) can succeed independently. Consequently, in most cases we have an imbalance of power: either the upstream or the downstream team can dictate the integration contract
    4. **three patterns addressing such power differences**
@@ -259,7 +259,7 @@
    
    1. After analyzing the integration patterns between a system’s bounded contexts, we can plot them on a context map
    
-   - ![Alt text](image-11.png)
+   - ![Alt text](img/image-11.png)
      - High-level design: A context map provides an overview of the system’s components and the models they implement.
      - Communication patterns: A context map depicts the communication patterns among teams
      - Organizational issues: A context map can give insight into organizational issues.
@@ -348,7 +348,7 @@
 
    ```
    ### Implicit distributed transactions
-   1. ![Alt text](image-12.png)
+   1. ![Alt text](img/image-12.png)
    2. if below method is part of a REST service and there is a network outage.
    3. if any failure case, client migght retry network call again it can make system as invalid state. There is not simple fix for this.
    4. one way to ensure transactional behavior is to make the operation ***idempotent***:
@@ -362,14 +362,14 @@
    ```
    ### When to Use Transaction Script
    1. in extract-transform-load (ETL) operations, each operation extracts data from a source, applies transformation logic to convert it into another form, and loads the result into the destination store.
-   - ![ETL: ](image-13.png)
+   - ![ETL: ](img/image-13.png)
    2. The transaction script pattern naturally fits supporting subdomains where, by definition, the business logic is simple.
    3. this pattern won’t cope with the high complexity of a core subdomain’s business logic.
    4. Sometimes the pattern is even treated as an antipattern. 
 
 2. # Active Record [anemic domain model antipattern]
 - Notes: active record supports cases where the business logic is simple. however, the business logic may operate on more complex data structures.
-- ![Alt text](image-14.png)
+- ![Alt text](img/image-14.png)
    
    ## Implementation
    
@@ -438,9 +438,10 @@
                   int _blue;
             }
             ```
-         5. ![id field makes a bug not only reduntant!!](image-15.png)
+         5. ![id field makes a bug not only reduntant!!](img/image-15.png)
 
    2. ### **Ubiquitous language**
-      
+      - Relying exclusively on the language’s standard library’s primitive data types—such as strings, integers, or dictionaries—to represent concepts of the business domain is known as the primitive obsession4 code smell.
+      - ![Alt text](img/image-16.png)
 
 
