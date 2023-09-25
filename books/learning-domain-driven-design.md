@@ -415,7 +415,6 @@
   
    1. For complex business logic
    2. instead of CRUD interfaces, we deal with complicated state transitions, business rules, and invariants: rules that have to be protected at all times.
-  
    ## Implementation
    
    1. A domain model is an object model of the domain that incorporates both behavior and data.1 DDD’s tactical patterns—aggregates, value objects, domain events, and domain services—are the building blocks of such an object model.
@@ -423,7 +422,6 @@
       1. objects implementing business logic without relying on or directly incorporating any infrastructural components or framework
    3. ### Ubiquitous language
       1. this pattern allows the code to “speak” the ubiquitous language and to follow the domain experts’ mental models.
-   
    ## Building Blocks
    1. ### **Value object**
       1. A value object is an object that can be identified by the composition of its values.
@@ -440,8 +438,116 @@
             ```
          5. ![id field makes a bug not only reduntant!!](img/image-15.png)
 
-   2. ### **Ubiquitous language**
-      - Relying exclusively on the language’s standard library’s primitive data types—such as strings, integers, or dictionaries—to represent concepts of the business domain is known as the primitive obsession4 code smell.
-      - ![Alt text](img/image-16.png)
+      #### **Ubiquitous language**
+         - Relying exclusively on the language’s standard library’s primitive data types—such as strings, integers, or dictionaries—to represent concepts of the business domain is known as the primitive obsession4 code smell.
+         - ![Primitive obsession code smell](img/image-16.png)
+         - the system cannot trust the user to always supply correct values, and as a result, the class has to validate all input fields.
+         -  It will become even more challenging in the future, when the codebase will be evolved by other engineers.
+         - ![With Value objects](img/image17.png)
+         1. Notice the increased clarity. Take, for example, the country variable.
+         2. There is no need to validate the values before the assignment, as the validation logic resides in the value objects themselves.
+         3. A value object’s behavior is not limited to mere validation
+         4. brightest when they centralize the business logic that manipulates the values
+         - Compared to an integer-based value, the Height value object both makes the intent clear and decouples the measurement from a specific measurement unit.
+         - ![Alt text](img/image18.png)
+         - The PhoneNumber value object can encapsulate the logic of parsing a string value, validating it, and extracting different attributes of the phone number; for example, the country it belongs to and the phone number’s type—landline or mobile:
+         - ![Alt text](img/image19.png)
+         - As you can see in the preceding examples, value objects eliminate the need for conventions
+         - makes using the object model less error prone and more intuitive.
 
+      #### **Implemantation**
+         - Since a change to any of the fields of a value object results in a different value, value objects are implemented as immutable objects. A change to one of the value object’s fields conceptually creates a different value—a different instance of a value object.
+         - ![Alt text](image.png)
+         - Since the equality of value objects is based on their values rather than on an id field or reference, it’s important to override and properly implement the equality checks
+         - ![Alt text](image-1.png)
+      #### **When to use value objects**
+         1. The simple answer is, whenever you can. Not only do value objects make the code more expressive and encapsulate business logic that tends to spread apart, but the pattern makes the code safer. 
+         2. to introduce a value object is when modeling money and other monetary values. 
+         3. Relying on primitive types to represent money not only limits your ability to encapsulate all money-related business logic in one place, but also often leads to dangerous bugs, such as rounding errors and other precision-related issues.
+   2. ### **Entities**
+      1. An entity is the opposite of a value object. It requires an explicit identification field to distinguish between the different instances of the entity.
+      2. Contrary to value objects, entities are not immutable and are expected to change. Another difference between entities and value objects is that value objects describe an entity’s properties.
+      - ![Entitiy with an Id](image-2.png)
+   3. ### **Aggregates** 
+      1. An aggregate is an entity. it requires an explicit identification field and its state is expected to change during an instance’s lifecycle.
+      2. **The goal of the pattern is to protect the consistency of its data.**
+      3. Since an aggregate’s data is mutable, there are implications and challenges that the pattern has to address to keep its state consistent at all times
+      #### Consistency enforcement
+         1. Since an aggregate’s state can be mutated, it creates an opening for multiple ways in which its data can become corrupted.
+         2. the aggregate pattern draws a clear boundary between the aggregate and its outer scope: the aggregate is a consistency enforcement boundary. The aggregate’s logic has **to validate all incoming modifications** and **ensure that the changes do not contradict its business rules.**
+         3. The state-modifying methods exposed as an aggregate’s public interface are often referred to as commands, as in “a command to do something.”
+         4.  A command can be implemented in two ways.
+         - ![with params](image-3.png)
+         - ![with param objects](image-4.png)
+         5. An aggregate’s public interface is responsible for validating the input and enforcing all of the relevant business rules and invariants.
+         6. This strict boundary also ensures that all business logic related to the aggregate is implemented in one place: the aggregate itself.
+         7. This makes the application layer [Service Layer] that orchestrates operations on aggregates rather simple
+         - ![Service layer finds the ticket, execute the command(or business) and return the result](image-5.png)
+         8.  If multiple processes are concurrently updating the same aggregate, we have to prevent the latter transaction from blindly overwriting the changes committed by the first one.
+         9. Hence, the database used for storing aggregates has to support concurrency management. In its simplest form, an aggregate should hold a version field that will be incremented after each update:
+         - ![Alt text](image-6.png)
+         10. ![Alt text](image-7.png)
+         11. document databases lend themselves more toward working with aggregates.
+         12.  it’s crucial to ensure that the database used for storing an aggregate’s data supports concurrency management.
+      #### *Transaction boundary*
+         1. Since an aggregate’s state can only be modified by its own business logic, the aggregate also acts as a transactional boundary.
+         2. All changes to the aggregate’s state should be committed transactionally as one atomic operation. If an aggregate’s state is modified, either all the changes are committed or none of them is.
+         3. no system operation can assume a multi-aggregate transaction. A change to an aggregate’s state can only be committed individually, one aggregate per database transaction.
+      #### *Hierarchy of entities*
+         1. we don’t use entities as an independent pattern, only as part of an aggregate.
+         2. There are business scenarios in which multiple objects should share a transactional boundary
+         3. DDD prescribes that a system’s design should be driven by its business domain.
+         - ![Alt text](image-8.png)
+         4. The hierarchy contains both entities and value objects, and all of them belong to the same aggregate if they are bound by the domain’s business logic.
+         5. That’s why the pattern is named “aggregate”: it aggregates business entities and value objects that belong to the same transaction boundary.
+         6. To support changes to multiple objects that have to be applied in one atomic transaction, the aggregate pattern resembles a hierarchy of entities, all sharing transactional consistency,
+         7. The aggregate ensures that all the conditions are checked against strongly consistent data, and it won’t change after the checks are completed by ensuring that all changes to the aggregate’s data are performed as one atomic transaction.
+      #### *Referencing other aggregates*
+         1.  Only the information that is required by the aggregate’s business logic to be strongly consistent should be a part of the aggregate. All information that can be eventually consistent should reside outside of the aggregate’s boundary;
+         - ![Alt text](image-9.png)
+         2. keep the aggregates as small as possible and include only objects that are required to be in a strongly consistent state by the aggregate’s business logic:
+         - ![Alt text](image-10.png)
+         -  the Ticket aggregate references a collection of messages, which belong to the aggregate’s boundary. On the other hand, the customer, the collection of products that are relevant to the ticket, and the assigned agent do not belong to the aggregate and therefore are referenced by its ID.
+         - The reasoning behind referencing external aggregates by ID is to reify that these objects do not belong to the aggregate’s boundary, and to ensure that each aggregate has its own transactional boundary
+      #### **Aggregate Root**
+         1. Since an aggregate represents a hierarchy of entities, only one of them should be designated as the aggregate’s public interface
+         2. ![Application Layer, Service Layer access the root and change internal state of the aggregate](image-11.png)
+         ![Message Entity changed by application layer by thourgh aggreagete root Ticket](image-12.png)
+         3. In addition to the aggregate root’s public interface, there is another mechanism through which the outer world can communicate with aggregates: domain events.
+      #### **Domain Events**
+         1. A domain event is a message describing a significant event that has occurred in the business domain
+         2. already happened, their names should be formulated in the past tense
+         3. Make sure the names of the domain events succinctly reflect exactly what has happened in the business domain.
+         4. Domain events are part of an aggregate’s public interface. An aggregate publishes its domain events.
+         5. Other processes, aggregates, or even external systems can subscribe to and execute their own logic in response to the domain events
+         6. ![Alt text](image-13.png)
+      #### **Ubiquitous language**
+         1. Last but not least, aggregates should reflect the ubiquitous language. The terminology that is used for the aggregate’s name, its data members, its actions, and its domain events all should be formulated in the bounded context’s ubiquitous language
+   4. ### **Domain Services**
+      1. You may encounter business logic that either doesn’t belong to any aggregate or value object, or that seems to be relevant to multiple aggregates. In such cases, domain-driven design proposes to implement the logic as a domain service.
+      2. A domain service is a stateless object that implements the business logic.
+      3. such logic orchestrates calls to various components of the system to perform some calculation or analysis.
+      4. Domain services make it easy to coordinate the work of multiple aggregates.
+      5. it is important to always keep in mind the aggregate pattern’s limitation of modifying only one instance of an aggregate in one database transaction. Domain services are not a loophole around this limitation
+      6. Instead, domain services lend themselves to implementing calculation logic that requires reading the data of multiple aggregates
+      7.  It is just a stateless object used to host business logic.
+   ## Conclusion
+      1. Value objects
+         Concepts of the business domain that can be identified exclusively by their values and thus do not require an explicit ID field. Since a change in one of the fields semantically creates a new value, value objects are immutable.
+
+         Value objects model not only data, but behavior as well: methods manipulating the values and thus initializing new value objects.
+
+      2. Aggregates
+         A hierarchy of entities sharing a transactional boundary. All of the data included in an aggregate’s boundary has to be strongly consistent to implement its business logic.
+
+         The state of the aggregate, and its internal objects, can only be modified through its public interface, by executing the aggregate’s commands. The data fields are read-only for external components for the sake of ensuring that all the business logic related to the aggregate resides in its boundaries.
+
+         The aggregate acts as a transactional boundary. All of its data, including all of its internal objects, has to be committed to the database as one atomic transaction.
+
+         An aggregate can communicate with external entities by publishing domain events—messages describing important business events in the aggregate’s lifecycle. Other components can subscribe to the events and use them to trigger the execution of business logic.
+
+      3. Domain services
+         A stateless object that hosts business logic that naturally doesn’t belong to any of the domain model’s aggregates or value objects.
+
+# Chapter 7. Modeling the Dimension of Time
 
