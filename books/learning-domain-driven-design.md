@@ -775,5 +775,67 @@
          1. 
          #### Asynchronous projections
          1. 
+   ## Scope
+   1. layered architecture, ports & adapters architecture, and CQRS—should not be treated as systemwide organizational principles
+   2. These are not necessarily high-level architecture patterns for a whole bounded context either.
+   3. Consider a bounded context multiple subdomains, The subdomains can be of different types: core, supporting, or generic. Even subdomains of the same type may require different business logic and architectural patterns. Enforcing a single, bounded, context wide architecture will inadvertently lead to accidental complexity.
+   4. ![Bounded context spanning multiple subdomains](img_5.png)
+   5. In addition to the layers that partition the system horizontally, we can introduce additional vertical partitioning.
+   6. Appropriate vertical boundaries make a monolithic bounded context a modular one and help to prevent it from becoming a big ball of mud.
+   7. ![Architectural(Vertically slicing)](img_6.png)
+   ## Conclusion
+   1. The layered architecture decomposes the codebase based on its technological concerns. Since this pattern couples business logic with data access implementation, it’s a good fit for active record–based systems.
+   2. The ports & adapters architecture inverts the relationships: it puts the business logic at the center and decouples it from all infrastructural dependencies. This pattern is a good fit for business logic implemented with the domain model pattern.
+   3. The CQRS pattern represents the same data in multiple models. Although this pattern is obligatory for systems based on the event-sourced domain model, it can also be used in any systems that need a way of working with multiple persistent models.
+
+# **Chapter 9. Communication Patterns**
+1. Facilitate cross-bounded context communication, address the limitations imposed by aggregate design principles, and orchestrate business processes spanning multiple system components.
+
+   ## Model Translation
+   1. A bounded context is the boundary of a model—a ubiquitous language.
+   2.  the teams implementing two bounded contexts are communicating effectively and willing to collaborate. In this case, the bounded contexts can be integrated in a **partnership**
+   3. the protocols can be coordinated in an ad hoc manner, and any integration issues can be effectively addressed through communication between the teams
+   4. Another cooperation-driven integration method is shared kernel: the teams extract and co-evolve a limited portion of a model; for example, extracting the bounded contexts’ integration contracts into a co-owned repository.
+   5. In a customer–supplier relationship, the balance of power tips toward either the upstream (supplier) or the downstream (consumer) bounded context. Suppose the downstream bounded context cannot conform to the upstream bounded context’s model.
+      1.  In this case, a more elaborate technical solution is required.
+   6. This translation can be handled by one, or sometimes both, sides
+      1. the downstream bounded context can adapt the upstream bounded context’s model to its needs using an **anticorruption layer (ACL)**
+      2.  the upstream bounded context can act as an **open-host service (OHS)** and protect its consumers from changes to its implementation model by using an integration-specific published language.
+   7. can be either stateless or stateful.
+
+   ### Stateless Model Translation
+   1.  the bounded context that owns the translation (OHS for upstream, ACL for downstream) implements the proxy design pattern to interject the incoming and outgoing requests and map the source model to the bounded context’s target model.
+      #### **Synchronous**
+      - The typical way to translate models used in synchronous communication is to embed the transformation logic in the bounded context’s codebase
+      - In some cases, it can be more cost-effective and convenient to offload the translation logic to an external component such as an API gateway pattern.
+      #### **Asynchronous**
+      - To translate models used in asynchronous communication you can implement a message proxy
+      - In addition to translating the messages’ model, the intercepting component can also reduce the noise on the target bounded context by filtering out irrelevant messages
+      -  Asynchronous translation can be used to intercept the domain events and convert them into a published language, thus providing better encapsulation of the bounded context’s implementation details
+   ### Stateful Model Translation
+   1. For more significant model transformations—for example, when the translation mechanism has to aggregate the source data or unify data from multiple sources into a single model—a stateful translation may be required
+   #### Unifying multiple sources
+   
+   ## Integrating Aggregates
+   1. one of the ways aggregates communicate with the rest of the system is by publishing domain events.
+   2.  External components can subscribe to these domain events and execute their logic. 
+   ### Outbox
+   1. Both the updated aggregate’s state and the new domain events are committed in the same atomic transaction
+   2. A message relay fetches newly committed domain events from the database.
+   3. The relay publishes the domain events to the message bus.
+   4. Upon successful publishing, the relay either marks the events as published in the database or deletes them completely.
+      - ![outbox](img_7.png)
+   5. When using a relational database, it’s convenient to leverage the database’s ability to commit to two tables atomically and use a dedicated table for storing the messages
+      - ![outbox table](img_8.png)
+   6. When using a NoSQL database that doesn’t support multidocument transactions, the outgoing domain events have to be embedded in the aggregate’s record.
+      - ![aggregate outbox doc](img_9.png)
+   ### Fetching unpublished events
+   1. The relay can continuously query the database for unpublished events. Proper indexes
+   2. It’s important to note that the outbox pattern guarantees delivery of the messages at least once: if the relay fails right after publishing a message but before marking it as published in the database, the same message will be published again in the next iteration
+   ### Saga
+   1. A saga is a long-running business process.
+   2.  It’s long running not necessarily in terms of time, as sagas can run from seconds to years, but rather in terms of transactions: a business process that spans multiple transactions.
+   3. The transactions can be handled not only by aggregates but by any component emitting domain events and responding to commands. 
+   4. The saga listens to the events emitted by the relevant components and issues subsequent commands to the other components. If one of the execution steps fails, the saga is in charge of issuing relevant compensating actions to ensure the system state remains consistent.
 
 
