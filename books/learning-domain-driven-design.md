@@ -72,17 +72,15 @@
       1. a wiki can be used as a glossary to capture and document the ubiquitous language
       2. It’s important to make glossary maintenance a shared effort. When a ubiquitous language is changed, all team members should be encouraged to go ahead and update the glossary
       3. Automated tests written in the Gherkin language are not only great tools for capturing the ubiquitous language but also act as an additional tool for bridging the gap between domain experts and software engineers.
-      
-      ```
-      Scenario: Notify the agent about a new support case
-              Given Vincent Jules submits a new support case saying:
-              """
-              I need help configuring AWS Infinidash
-              """
-              When the ticket is assigned to Mr. Wolf
-              Then the agent receives a notification about the new ticket
-      ```
-      
+         ```
+          Scenario: Notify the agent about a new support case
+               Given Vincent Jules submits a new support case saying:
+               """
+               I need help configuring AWS Infinidash
+               """
+               When the ticket is assigned to Mr. Wolf
+               Then the agent receives a notification about the new ticket
+         ```
       4. Finally, there are even static code analysis tools that can verify the usage of a ubiquitous language’s terms. A notable example for such a tool is NDepend
    6. ### Challenges
       
@@ -704,15 +702,78 @@
 
       **Note**: The layers architecture is often confused with the N-Tier architecture, and vice versa. layers and tiers are conceptually different: a layer is a logical boundary
       a tier is an independently deployable service, server, or system.
-      ![These are tiers not layers. Since they can deploy or managed differently](image-7.png)
-   
+      ![These are tiers not layers. Since they can deploy or managed differently](image-7.png) 
    ## Ports & Adapters  
    1. is a better fit for implementation of more complex business logic.
    2. Interestingly, both patterns are quite similar. Let’s “refactor” the layered architecture into ports & adapters.
 
-   ### Terminology
-   1. Below layers does not reflect business logic so we call it as below
-   ![Presentation and data access layers combined into an infrastructure layer](image-8.png)
+      ### Terminology
+      1. Below layers does not reflect business logic so we call it as below
+      ![Presentation and data access layers combined into an infrastructure layer](image-8.png)
+
+      ### Dependency Inversion Principle [Important TOO MUCH]
+      1. The dependency inversion principle (DIP) states that high-level modules, which implement the business logic, should not depend on low-level modules.
+      2. That’s precisely what happens in the traditional layered architecture.
+      3. The business logic layer depends on the infrastructure layer. To conform with the DIP, let’s reverse the relationship
+         - ![Reversed Dependencies](img_1.png)
+      4. Instead of being sandwiched between the technological concerns, now the business logic layer takes the central role. It doesn’t depend on any of the system’s infrastructural components.
+      5. let’s add an application layer as a façade for the system’s public interface. As the service layer in the layered architecture, it describes all the operations exposed by the system and orchestrates the system’s business logic for executing them.
+         * ![Traditional Layers of Porst & Adapters](img_2.png)
+      6. The business logic doesn’t depend on any of the underlying layers, as required for implementing the domain model and event-sourced domain model patterns.
+      ### Integration of Infrastructural Components
+      1. The core goal of the ports & adapters architecture is to decouple the system’s business logic from its infrastructural components.
+      2. Instead of referencing and calling the infrastructural components directly, the business logic layer defines “ports” that have to be implemented by the infrastructure layer.
+      3. The infrastructure layer implements “adapters”: concrete implementations of the ports’ interfaces for working with different technologies
+         * ![Ports & Adapters](img_3.png)
+      4. The abstract ports are resolved into concrete adapters in the infrastructure layer, either through dependency injection or by bootstrapping.
+      ```
+         namespace App.BusinessLogicLayer
+         {
+            public interface IMessaging
+            {
+               void Publish(Message payload);
+               void Subscribe(Message type, Action callback);
+            }
+         }
+
+         namespace App.Infrastructure.Adapters
+         {
+             public class SQSBus: IMessaging { ... }
+         }
+      ```
+      ### Variants
+      1. The ports & adapters architecture is also known as **hexagonal architecture**, **onion architecture**, and **clean architecture**.
+      2. All of these patterns are based on the same design principles, have the same components, and have the same relationships between them, but as in the case of the layered architecture, the terminology may differ:
+         * Application layer = **service layer = use case layer**
+         * Business logic layer = **domain layer = core layer**
+      ### When to Use Ports & Adapters
+      1. The decoupling of the business logic from all technological concerns makes the ports & adapters architecture a perfect fit for business logic implemented with the domain model pattern.
+   ## Command-Query Responsibility Segregation (Not fullfilled)
+   1. The command-query responsibility segregation (CQRS) pattern is based on the same organizational principles for business logic and infrastructural concerns as ports & adapters.
+   2. It differs, however, in the way the system’s data is managed. This pattern enables representation of the system’s data in multiple persistent models.
+      ### Polyglot Modeling
+      1. In many cases, it may be difficult, if not impossible, to use a single model of the system’s business domain to address all of the system’s needs.
+      2. online transaction processing (OLTP) and online analytical processing (OLAP) may require different representations of the system’s data.
+      3. the CQRS pattern is closely related to event sourcing.
+      4. CQRS was defined to address the limited querying possibilities of an event-sourced model: it is only possible to query events of one aggregate instance at a time. 
+      5. The CQRS pattern provides the possibility of materializing projected models into physical databases that can be used for flexible querying options.
+      6. That said, this chapter “decouples” CQRS from event sourcing. I intend to show that CQRS is useful even if the business logic is implemented using any of the other business logic implementation patterns.
+      ### Implementation
+      1. As the name suggests, the pattern segregates the responsibilities of the system’s models. There are two types of models: the command execution model and the read models
+         #### Command execution model
+         1. CQRS devotes a single model to executing operations that modify the system’s state (system commands). This model is used to implement the business logic, validate rules, and enforce invariants.
+         2. The command execution model is also the only model representing strongly consistent data—the system’s source of truth.
+         #### Read models (projections)
+         1. A read model is a precached projection. It can reside in a durable database, flat file, or in-memory cache.
+         2. Proper implementation of CQRS allows for wiping out all data of a projection and regenerating it from scratch.
+         3. read models are read-only. None of the system’s operations can directly modify the read models’ data.
+      ### Projecting Read Models
+      1. the system has to project changes from the command execution model to all its read models.
+      2. ![CQRS Architecture](img_4.png)
+      3. The projection of read models is similar to the notion of a materialized view in relational databases: whenever source tables are updated, the changes have to be reflected in the precached views
+         #### Synchronous projections
+         1. 
+         #### Asynchronous projections
+         1. 
 
 
-       
