@@ -634,5 +634,85 @@
    5. This chapter completes our exploration of the different ways to model and implement business logic.
 
 # **Chapter 8. Architectural Patterns**
+1. The tactical patterns the different ways to model and implement business logic. 
+2. In a broader context: the different ways to orchestrate the interactions and dependencies between a system’s components.
+
+   ## Business Logic Versus Architectural Patterns
+   1. Business logic is the most important part of software, not the only part of a software system.
+   2.  To implement functional and nonfunctional requirements,  the codebase has to fulfill more responsibilities
+   3. Architectural patterns introduce organizational principles for the different aspects of a codebase and present clear boundaries between them
+   4. Choosing the appropriate way to organize the codebase, or the correct architectural pattern, is crucial to support implementation of the business logic in the short term and alleviate maintenance in the long term.
+
+   ## Layered Architecture
+   1. It organizes the codebase into horizontal layers
+   - ![ the presentation layer (PL), the business logic layer (BLL), and the data access layer (DAL)](image.png)
+      ### Presentation Layer
+      1. implements the program’s user interface for interactions with its consumers.
+         1. Graphical user interface (GUI)
+         2. Command-line interface (CLI)
+         3. API for programmatic integration with other systems(Rest, gRPC)
+         4. Subscription to events in a message broker
+         5. Message topics for publishing outgoing events
+         - ![Alt text](image-1.png)
+      ### Business Logic Layer
+      1.  this layer is responsible for implementing and encapsulating the program’s business logic. **this layer is the heart of software**
+      2. active records or a domain models
+      - ![Alt text](image-2.png)
+      ### Data Access Layer
+      1. The data access layer provides access to persistence mechanisms
+      2. NoSQL 
+      - ![Alt text](image-3.png)
+
+      ### Communication Between Layers
+      1. The layers are integrated in a top-down communication model
+      2. each layer can hold a dependency only on the layer directly beneath it
+      - ![Alt text](image-4.png)
+
+      ### Service layer
+      - It’s common to see the layered architecture pattern extended with an additional the service layer
+      - The service layer acts as an intermediary between the program’s presentation and business logic layers
+
+      - To further decouple the presentation layer from the underlying business logic, such orchestration logic can be moved into a service layer,
+      - ![Service Layer](image-5.png)
+
+      - It’s important to note that in the context of the architectural pattern, the service layer is a logical boundary.
+
+      -The service layer acts as a façade for the business logic layer: it exposes an interface that corresponds with the public interface’s methods, encapsulating the required orchestration of the underlying layers. 
+      ![](image-6.png)
+
+      -  The presentation layer’s responsibility becomes limited to providing the required input to the service layer and communicating its responses back to the caller.
+
+      #### Advantages
+      1. We can reuse the same service layer to serve multiple public interfaces; for example, a graphical user interface and an API. No duplication of the orchestration logic is required
+      2. It improves modularity by gathering all related methods in one place.
+      3. It further decouples the presentation and business logic layers.
+      4. It makes it easier to test the business functionality.
+      ### Continue
+      5. the service layer is required if the business logic pattern requires external orchestration
+      6. as in the case of the active record pattern. In this case, the service layer implements the transaction script pattern, while the active records it operates on are located in the business logic layer
+
+      ### Terminology
+      - Presentation layer = user interface layer
+      - Service layer = application layer-
+      - Business logic layer = domain layer = model layer
+      - Data access layer = infrastructure layer
+
+      ### When to Use Layered Architecture
+      1. The dependency between the business logic and the data access layers makes this architectural pattern a good fit for a system with its business logic implemented using the transaction script or active record pattern
+      
+      2. the pattern makes it challenging to implement a domain model. In a domain model, the business entities (aggregates and value objects) should have no dependency and no knowledge of the underlying infrastructure
+
+      **Note**: The layers architecture is often confused with the N-Tier architecture, and vice versa. layers and tiers are conceptually different: a layer is a logical boundary
+      a tier is an independently deployable service, server, or system.
+      ![These are tiers not layers. Since they can deploy or managed differently](image-7.png)
+   
+   ## Ports & Adapters  
+   1. is a better fit for implementation of more complex business logic.
+   2. Interestingly, both patterns are quite similar. Let’s “refactor” the layered architecture into ports & adapters.
+
+   ### Terminology
+   1. Below layers does not reflect business logic so we call it as below
+   ![Presentation and data access layers combined into an infrastructure layer](image-8.png)
+
 
        
