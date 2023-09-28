@@ -643,7 +643,7 @@
 
    ## Layered Architecture
    1. It organizes the codebase into horizontal layers
-   - ![ the presentation layer (PL), the business logic layer (BLL), and the data access layer (DAL)](image.png)
+   - ![ the presentation layer (PL), the business logic layer (BLL), and the data access layer (DAL)](img/dimage.png)
       ### Presentation Layer
       1. implements the program’s user interface for interactions with its consumers.
          1. Graphical user interface (GUI)
@@ -651,32 +651,32 @@
          3. API for programmatic integration with other systems(Rest, gRPC)
          4. Subscription to events in a message broker
          5. Message topics for publishing outgoing events
-         - ![Alt text](image-1.png)
+         - ![Alt text](img/dimage-1.png)
       ### Business Logic Layer
       1.  this layer is responsible for implementing and encapsulating the program’s business logic. **this layer is the heart of software**
       2. active records or a domain models
-      - ![Alt text](image-2.png)
+      - ![Alt text](img/dimage-2.png)
       ### Data Access Layer
       1. The data access layer provides access to persistence mechanisms
       2. NoSQL 
-      - ![Alt text](image-3.png)
+      - ![Alt text](img/dimage-3.png)
 
       ### Communication Between Layers
       1. The layers are integrated in a top-down communication model
       2. each layer can hold a dependency only on the layer directly beneath it
-      - ![Alt text](image-4.png)
+      - ![Alt text](img/dimage-4.png)
 
       ### Service layer
       - It’s common to see the layered architecture pattern extended with an additional the service layer
       - The service layer acts as an intermediary between the program’s presentation and business logic layers
 
       - To further decouple the presentation layer from the underlying business logic, such orchestration logic can be moved into a service layer,
-      - ![Service Layer](image-5.png)
+      - ![Service Layer](img/dimage-5.png)
 
       - It’s important to note that in the context of the architectural pattern, the service layer is a logical boundary.
 
       -The service layer acts as a façade for the business logic layer: it exposes an interface that corresponds with the public interface’s methods, encapsulating the required orchestration of the underlying layers. 
-      ![](image-6.png)
+      ![](img/dimage-6.png)
 
       -  The presentation layer’s responsibility becomes limited to providing the required input to the service layer and communicating its responses back to the caller.
 
@@ -702,29 +702,29 @@
 
       **Note**: The layers architecture is often confused with the N-Tier architecture, and vice versa. layers and tiers are conceptually different: a layer is a logical boundary
       a tier is an independently deployable service, server, or system.
-      ![These are tiers not layers. Since they can deploy or managed differently](image-7.png) 
+      ![These are tiers not layers. Since they can deploy or managed differently](img/dimage-7.png) 
    ## Ports & Adapters  
    1. is a better fit for implementation of more complex business logic.
    2. Interestingly, both patterns are quite similar. Let’s “refactor” the layered architecture into ports & adapters.
 
       ### Terminology
       1. Below layers does not reflect business logic so we call it as below
-      ![Presentation and data access layers combined into an infrastructure layer](image-8.png)
+      ![Presentation and data access layers combined into an infrastructure layer](img/dimage-8.png)
 
       ### Dependency Inversion Principle [Important TOO MUCH]
       1. The dependency inversion principle (DIP) states that high-level modules, which implement the business logic, should not depend on low-level modules.
       2. That’s precisely what happens in the traditional layered architecture.
       3. The business logic layer depends on the infrastructure layer. To conform with the DIP, let’s reverse the relationship
-         - ![Reversed Dependencies](img_1.png)
+         - ![Reversed Dependencies](img/img_1.png)
       4. Instead of being sandwiched between the technological concerns, now the business logic layer takes the central role. It doesn’t depend on any of the system’s infrastructural components.
       5. let’s add an application layer as a façade for the system’s public interface. As the service layer in the layered architecture, it describes all the operations exposed by the system and orchestrates the system’s business logic for executing them.
-         * ![Traditional Layers of Porst & Adapters](img_2.png)
+         * ![Traditional Layers of Porst & Adapters](img/img_2.png)
       6. The business logic doesn’t depend on any of the underlying layers, as required for implementing the domain model and event-sourced domain model patterns.
       ### Integration of Infrastructural Components
       1. The core goal of the ports & adapters architecture is to decouple the system’s business logic from its infrastructural components.
       2. Instead of referencing and calling the infrastructural components directly, the business logic layer defines “ports” that have to be implemented by the infrastructure layer.
       3. The infrastructure layer implements “adapters”: concrete implementations of the ports’ interfaces for working with different technologies
-         * ![Ports & Adapters](img_3.png)
+         * ![Ports & Adapters](img/img_3.png)
       4. The abstract ports are resolved into concrete adapters in the infrastructure layer, either through dependency injection or by bootstrapping.
       ```
          namespace App.BusinessLogicLayer
@@ -769,7 +769,7 @@
          3. read models are read-only. None of the system’s operations can directly modify the read models’ data.
       ### Projecting Read Models
       1. the system has to project changes from the command execution model to all its read models.
-      2. ![CQRS Architecture](img_4.png)
+      2. ![CQRS Architecture](img/img_4.png)
       3. The projection of read models is similar to the notion of a materialized view in relational databases: whenever source tables are updated, the changes have to be reflected in the precached views
          #### Synchronous projections
          1. 
@@ -779,10 +779,10 @@
    1. layered architecture, ports & adapters architecture, and CQRS—should not be treated as systemwide organizational principles
    2. These are not necessarily high-level architecture patterns for a whole bounded context either.
    3. Consider a bounded context multiple subdomains, The subdomains can be of different types: core, supporting, or generic. Even subdomains of the same type may require different business logic and architectural patterns. Enforcing a single, bounded, context wide architecture will inadvertently lead to accidental complexity.
-   4. ![Bounded context spanning multiple subdomains](img_5.png)
+   4. ![Bounded context spanning multiple subdomains](img/img_5.png)
    5. In addition to the layers that partition the system horizontally, we can introduce additional vertical partitioning.
    6. Appropriate vertical boundaries make a monolithic bounded context a modular one and help to prevent it from becoming a big ball of mud.
-   7. ![Architectural(Vertically slicing)](img_6.png)
+   7. ![Architectural(Vertically slicing)](img/img_6.png)
    ## Conclusion
    1. The layered architecture decomposes the codebase based on its technological concerns. Since this pattern couples business logic with data access implementation, it’s a good fit for active record–based systems.
    2. The ports & adapters architecture inverts the relationships: it puts the business logic at the center and decouples it from all infrastructural dependencies. This pattern is a good fit for business logic implemented with the domain model pattern.
@@ -824,11 +824,11 @@
    2. A message relay fetches newly committed domain events from the database.
    3. The relay publishes the domain events to the message bus.
    4. Upon successful publishing, the relay either marks the events as published in the database or deletes them completely.
-      - ![outbox](img_7.png)
+      - ![outbox](img/img_7.png)
    5. When using a relational database, it’s convenient to leverage the database’s ability to commit to two tables atomically and use a dedicated table for storing the messages
-      - ![outbox table](img_8.png)
+      - ![outbox table](img/img_8.png)
    6. When using a NoSQL database that doesn’t support multidocument transactions, the outgoing domain events have to be embedded in the aggregate’s record.
-      - ![aggregate outbox doc](img_9.png)
+      - ![aggregate outbox doc](img/img_9.png)
    ### Fetching unpublished events
    1. The relay can continuously query the database for unpublished events. Proper indexes
    2. It’s important to note that the outbox pattern guarantees delivery of the messages at least once: if the relay fails right after publishing a message but before marking it as published in the database, the same message will be published again in the next iteration
