@@ -38,4 +38,4 @@
 1. Sealed classes 
 
 
-Kotlin class has header constructor and second contructor
+Kotlin class has header constructor and second constructor
